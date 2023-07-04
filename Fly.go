@@ -1,12 +1,3 @@
-// This code simulates a flight booking through frquent flyer program.
-// There are 2 programms: Gold and Silver Passenger. They benefit a higher miles factor when they book a ticket.
-// A traveler must first register, either as Gold or Silver or just as "normal" passenger.
-// The data of every Gold and Silver passenger is kept as a Passenger type, which contains an id and a current bank account. Current miles are set to 0.
-
-// In every purchase the price of the ticket is redeemed from the traveler's bank account.
-
-// This code contains method translations from the Java code, and aims to implement OOP features as much as possible
-
 package main
 
 import (
@@ -16,6 +7,8 @@ import (
 
 // global variable of ID lists
 var id_list = list.New()
+var goldfac = 0.5
+var silverfac = 0.25
 
 // Checks if the given ID already exist
 // returns true if valid. otherwise returns false
@@ -31,7 +24,8 @@ func isValid(id int) bool {
 }
 
 type flightticket interface {
-	newPassenger(int, int)
+	bookATicket(int)
+	getLoungeVoucher()
 }
 
 type Passenger struct {
@@ -50,6 +44,50 @@ type SilverPassenger struct {
 	pass Passenger
 }
 
+func newTravel(f flightticket, price int) {
+	f.bookATicket(price)
+	f.getLoungeVoucher()
+}
+
+func (p *Passenger) bookATicket(price int) {
+	if p.bankAccount-price < 0 {
+		errordisplay(p.id)
+		return
+	}
+	p.bankAccount -= price
+	p.miles += float64(price)
+	fmt.Printf("passenger #%d booked a ticket.\nPrice: $%d\nMiles: %.2f\nCurrent in account: $%d\n\n", p.id, price, p.miles, p.bankAccount)
+}
+
+func (g *GoldPassenger) bookATicket(price int) {
+	if g.pass.bankAccount-price < 0 {
+		errordisplay(g.pass.id)
+		return
+	}
+	g.pass.miles += g.fac * float64(price)
+	g.pass.bookATicket(price)
+}
+
+func (s *SilverPassenger) bookATicket(price int) {
+	if s.pass.bankAccount-price < 0 {
+		errordisplay(s.pass.id)
+		return
+	}
+	s.pass.miles += s.fac * float64(price)
+	s.pass.bookATicket(price)
+}
+
+func (p *Passenger) getLoungeVoucher() {}
+func (g GoldPassenger) getLoungeVoucher() {
+	fmt.Println("You get free lounge access\n")
+}
+func (s *SilverPassenger) getLoungeVoucher() {
+	if s.pass.bankAccount-20 >= 0 {
+		s.pass.bankAccount -= 20
+		fmt.Printf("For entering the lounge you paid $20. Current in account: $%d\n\n", s.pass.bankAccount)
+	}
+}
+
 // Cunstructor for the Passenger type
 // receiver of a Passenegr reference
 func (p *Passenger) newPassenger(id int, bankAccount int) {
@@ -60,21 +98,19 @@ func (p *Passenger) newPassenger(id int, bankAccount int) {
 	} else {
 		fmt.Printf("ID %d already exists\n", id)
 	}
-
 }
 
 // Cunstructor for the Gold passenger type, fac is set to 1.5
 // receiver of a GoldPassenger reference
 func (g *GoldPassenger) newPassenger(id int, bankAccount int) {
-	g.fac = 1.5
+	g.fac = goldfac
 	g.pass.newPassenger(id, bankAccount)
-
 }
 
 // Cunstructor for the Silver passenger type, fac is set to 1.25
 // receiver of a SilverPassenger reference
 func (s *SilverPassenger) newPassenger(id int, bankAccount int) {
-	s.fac = 1.25
+	s.fac = silverfac
 	s.pass.newPassenger(id, bankAccount)
 
 }
@@ -102,92 +138,61 @@ func addToBankAccount(anything interface{}, amount int) {
 
 	}
 
-	fmt.Printf("Deposit: %d + %d = %d\n\n", t1, amount, t2)
-}
-
-// Through interface{} the passneger's type is identified
-// The price is redeemed from the bank account
-// Every Passenger earns miles, equal to the price. Gold and Silver enjoy a factor of 1.5 and 1.25 respectively.
-func bookATicket(anything interface{}, price int) {
-	switch v := anything.(type) {
-	case *GoldPassenger:
-		if v.pass.bankAccount-price >= 0 {
-			v.pass.bankAccount -= price
-			v.pass.miles += v.fac * float64(price)
-			fmt.Printf("Gold passenger #%d booked a ticket.\nPrice: %d\nMiles %f\nCurrent in account: $%d\n\n", v.pass.id, price, v.pass.miles, v.pass.bankAccount)
-		} else {
-			errordisplay(v.pass.id)
-		}
-
-	case *SilverPassenger:
-		if v.pass.bankAccount-price >= 0 {
-			v.pass.bankAccount -= price
-			v.pass.miles += v.fac * float64(price)
-			fmt.Printf("Silver passenger #%d booked a ticket.\nPrice: %d\nMiles %f\nCurrent in account: $%d\n\n", v.pass.id, price, v.pass.miles, v.pass.bankAccount)
-		} else {
-			errordisplay(v.pass.id)
-		}
-	case *Passenger:
-		if v.bankAccount-price >= 0 {
-			v.bankAccount -= price
-			v.miles += float64(price)
-			fmt.Printf("Passenger #%d booked a ticket.\nPrice: %d\nMiles %f\nCurrent in account: $%d\n\n", v.id, price, v.miles, v.bankAccount)
-		} else {
-			errordisplay(v.id)
-		}
-
-	}
+	fmt.Printf("Deposit: %d + %d = $%d\n\n", t1, amount, t2)
 }
 
 // The function displays a message when there is insufficient amount to purchase a ticket
 func errordisplay(id int) {
-	fmt.Printf("Booking for Passenger #%d has failed.\nMoney was not taken from your account.\nPlease try again later.\n\n", id)
+	fmt.Printf("Booking for Passenger #%d has failed. Money was not taken from your account. Please try again later.\n\n", id)
 }
 
 // Demo
-// Id of a gold passenger is set to 1#
-// Id of a silver Passenger is set to 2#
-// Id of a normal Passenger is set to 3#
+// Id of a gold passenger starts with 1
+// Id of a silver Passenger starts with 2
+// Id of a normal Passenger starts with 3
 
 func main() {
 
+	// normal passenger
 	pass := Passenger{}
 	pass.newPassenger(31, 0)
-
 	addToBankAccount(&pass, 98)
-	bookATicket(&pass, 40)
+	// bank account after purchase: &58
+	newTravel(&pass, 40)
+	// booking is not possible
+	newTravel(&pass, 60)
 
-	pass2 := Passenger{}
-	pass2.newPassenger(31, 0) // #31 already exists
-
-	addToBankAccount(&pass2, 98)
-	bookATicket(&pass2, 40)
-
+	// gold member registration
 	gp := GoldPassenger{}
-	gp.newPassenger(11, 0)
-	addToBankAccount(&gp, 60)
-	bookATicket(&gp, 30)
+	gp.newPassenger(11, 98)
+	// bank account after purchase: &58
+	// gets a free lounge access
+	newTravel(&gp, 40)
 
-	gp2 := GoldPassenger{}
-	gp2.newPassenger(12, 0)
-	addToBankAccount(&gp2, 100)
-	bookATicket(&gp2, 256)
-	bookATicket(&gp2, 10)
-
-	gp3 := GoldPassenger{}
-	gp3.newPassenger(33, 0)
-	bookATicket(&gp3, 60)
-
+	// silver member registration
 	sil := SilverPassenger{}
 	sil.newPassenger(21, 0)
-	addToBankAccount(&sil, 60)
-	bookATicket(&sil, 40)
+	addToBankAccount(&sil, 70)
+	// bank account after purchase + lounge access's fee: $30
+	newTravel(&sil, 20)
+	// bank account after purchase: $10
+	// No lounge access
+	newTravel(&sil, 20)
+	// bank account: $35
+	addToBankAccount(&sil, 25)
+	// booking is not possible, but still charged for the lounge
+	newTravel(&sil, 40)
 
-	addToBankAccount(&gp3, 600)
-	bookATicket(&gp3, 456)
+	gp2 := GoldPassenger{}
+	// new gold passenger with $20 at registration
+	gp2.newPassenger(12, 20)
+	// booking has failed, but gets a message with a free access to the lounge
+	newTravel(&gp2, 50)
 
-	bookATicket(&gp2, 20)
+	pass2 := Passenger{}
+	// #31 already exists
+	pass2.newPassenger(31, 0)
+	// pass2 behave like an independent object
+	addToBankAccount(&pass2, 98)
+	newTravel(&pass2, 40)
 }
-
-// Improvement Ideas:
-// Should implement an exception when trying to create passenger with an Id that is already exists.
