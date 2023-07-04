@@ -95,9 +95,11 @@ A silver passenger gets access to the lounge with a $20 fee.
 Price: $20
 Miles: 25.00
 Current in account: $50
-``` 
 
 For entering the lounge you paid $20. Current in account: $30
+``` 
+
+
 
 When we book another ticket, this passenger doesn't get any notice about a lounge
 Output
