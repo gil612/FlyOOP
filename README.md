@@ -1,9 +1,10 @@
 # Flight Booking Process
-This code simulates a flight booking through frequent flyer program. There are 2 programs: Gold and Silver Passenger. They benefit from a higher miles factor when they book a ticket. A traveler must first register, either as Gold or Silver or just as "normal" passenger. The data of every gold and silver passenger is kept as a Passenger type, which contains an id and a current bank account. Current miles are set to 0.
-In every purchase the price of the ticket is redeemed from the traveler's bank account.
+This code simulates a flight booking through frequent flyer program. There are 2 programs: Gold and Silver Passenger.
+
 This code contains method translations from the Java code, and aims to implement OOP concepts like polymorphism, inheritance and substitutability as much as possible.
-The process: A traveler must first register, either as Gold or Silver or just as "normal" passenger, with a certain n amount of money, or he can add later with a function "addToBankAccount"
-To start a new booking process, we must use the function "newTravel". This function implements call functions of the interface flightticket, which are bookATicket and getLoungeVoucher.
+
+The process: A traveler must first register, either as Gold or Silver or just as "normal" passenger, with a certain n amount of money, or he can add later with a function "addToBankAccount".
+To start a new booking process, we must use the function "newTravel". This function calls the functions of the interface flightticket, which are bookATicket and getLoungeVoucher.
 
 
 ### Booking policy
