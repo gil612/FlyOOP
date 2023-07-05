@@ -164,14 +164,16 @@ Current: $20
 
 Passenger #12 gets a free lounge access
 ``` 
-Insights about the code:
-Implementing the Liskov Principle was done almost successfully. There is a call to get lounge voucher for normal passengers. But since according to the policy he's not allowed to enter the lounge, he doesn't get any message. This is done with the empty function
+### Insights about the code
+Unfortunately, gold and silver passengers have an additional and unnecessary check for their ticket price and bank account. This is because they are being referenced to _func (p *Passenger) bookATicket(price int)_.
+
+Implementing the Liskov substitution principle was done almost successfully. There is a call to get lounge voucher for normal passengers - which is our super class. But since according to the policy he's not allowed to enter the lounge, he doesn't get any message. This is done with an empty function:
 
 ```
 func (p *Passenger) getLoungeVoucher() {}
 ```
 
-_is what happens when we register a passenger with an ID that already exists. The ID given is 0. But the object referenced to this passenger is different from the other passenger’s object with the same ID. There should be an error handling of this case. In GO there aren't any exceptions.
+when we register a passenger with an ID that already exists, The assigned ID is 0. But the object referenced to this passenger is different from the other passenger’s object with the same ID. There should be an error handling of this case.
 
 
 ```
@@ -209,4 +211,7 @@ case *SilverPassenger:
     t2 = v.pass.bankAccount
     id = v.pass.id
 ```
+
+
+
 Overall, it was possible to implement OO principles with GO.
