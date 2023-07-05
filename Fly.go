@@ -7,7 +7,11 @@ import (
 
 // global variable of ID lists
 var id_list = list.New()
+
+// Miles factor for gold members is set to 0.5
 var goldfac = 0.5
+
+// Miles factor for silver members is set to 0.5
 var silverfac = 0.25
 
 // Checks if the given ID already exist
@@ -23,7 +27,7 @@ func isValid(id int) bool {
 
 }
 
-type flightticket interface {
+type flightTicket interface {
 	bookATicket(int)
 	getLoungeVoucher()
 }
@@ -44,24 +48,24 @@ type SilverPassenger struct {
 	pass Passenger
 }
 
-func newTravel(f flightticket, price int) {
+func newTravel(f flightTicket, price int) {
 	f.bookATicket(price)
 	f.getLoungeVoucher()
 }
 
 func (p *Passenger) bookATicket(price int) {
 	if p.bankAccount-price < 0 {
-		errordisplay(p.id)
+		errordisplay(p.id, p.bankAccount, price)
 		return
 	}
 	p.bankAccount -= price
 	p.miles += float64(price)
-	fmt.Printf("passenger #%d booked a ticket.\nPrice: $%d\nMiles: %.2f\nCurrent in account: $%d\n\n", p.id, price, p.miles, p.bankAccount)
+	fmt.Printf("Passenger #%d booked a ticket.\nPrice: $%d\nMiles: %.2f\nCurrent in account (after transaction): $%d\n\n", p.id, price, p.miles, p.bankAccount)
 }
 
 func (g *GoldPassenger) bookATicket(price int) {
 	if g.pass.bankAccount-price < 0 {
-		errordisplay(g.pass.id)
+		errordisplay(g.pass.id, g.pass.bankAccount, price)
 		return
 	}
 	g.pass.miles += g.fac * float64(price)
@@ -70,7 +74,7 @@ func (g *GoldPassenger) bookATicket(price int) {
 
 func (s *SilverPassenger) bookATicket(price int) {
 	if s.pass.bankAccount-price < 0 {
-		errordisplay(s.pass.id)
+		errordisplay(s.pass.id, s.pass.bankAccount, price)
 		return
 	}
 	s.pass.miles += s.fac * float64(price)
@@ -78,13 +82,13 @@ func (s *SilverPassenger) bookATicket(price int) {
 }
 
 func (p *Passenger) getLoungeVoucher() {}
-func (g GoldPassenger) getLoungeVoucher() {
-	fmt.Println("You get free lounge access\n")
+func (g *GoldPassenger) getLoungeVoucher() {
+	fmt.Printf("Passenger #%d gets a free lounge access\n", g.pass.id)
 }
 func (s *SilverPassenger) getLoungeVoucher() {
 	if s.pass.bankAccount-20 >= 0 {
 		s.pass.bankAccount -= 20
-		fmt.Printf("For entering the lounge you paid $20. Current in account: $%d\n\n", s.pass.bankAccount)
+		fmt.Printf("For entering the lounge passenger #%d paid $20. Current in account: $%d\n\n", s.pass.id, s.pass.bankAccount)
 	}
 }
 
@@ -100,14 +104,16 @@ func (p *Passenger) newPassenger(id int, bankAccount int) {
 	}
 }
 
-// Cunstructor for the Gold passenger type, fac is set to 1.5
+// Cunstructor for the GoldPassenger type
+// @fac is set to 0.5 (assigned from the global variable @goldfac)
 // receiver of a GoldPassenger reference
 func (g *GoldPassenger) newPassenger(id int, bankAccount int) {
 	g.fac = goldfac
 	g.pass.newPassenger(id, bankAccount)
 }
 
-// Cunstructor for the Silver passenger type, fac is set to 1.25
+// Cunstructor for the SilverPassenger type
+// @fac is set to 0.25 (assigned from the global variable @silverfac)
 // receiver of a SilverPassenger reference
 func (s *SilverPassenger) newPassenger(id int, bankAccount int) {
 	s.fac = silverfac
@@ -121,29 +127,32 @@ func addToBankAccount(anything interface{}, amount int) {
 
 	t1 := 0
 	t2 := 0
+	var id int
 
 	switch v := anything.(type) {
 	case *GoldPassenger:
 		t1 = v.pass.bankAccount
 		v.pass.bankAccount += amount
 		t2 = v.pass.bankAccount
+		id = v.pass.id
 	case *SilverPassenger:
 		t1 = v.pass.bankAccount
 		v.pass.bankAccount += amount
 		t2 = v.pass.bankAccount
+		id = v.pass.id
 	case *Passenger:
 		t1 = v.bankAccount
 		v.bankAccount += amount
 		t2 = v.bankAccount
-
+		id = v.id
 	}
 
-	fmt.Printf("Deposit: %d + %d = $%d\n\n", t1, amount, t2)
+	fmt.Printf("Deposit of passenger #%d: %d + %d = $%d\n\n", id, t1, amount, t2)
 }
 
 // The function displays a message when there is insufficient amount to purchase a ticket
-func errordisplay(id int) {
-	fmt.Printf("Booking for Passenger #%d has failed. Money was not taken from your account. Please try again later.\n\n", id)
+func errordisplay(id int, baccount int, price int) {
+	fmt.Printf("Booking for Passenger #%d has failed.\nTicket Price: $%d \nCurrent: $%d\n\n", id, price, baccount)
 }
 
 // Demo
@@ -162,7 +171,7 @@ func main() {
 	// booking is not possible
 	newTravel(&pass, 60)
 
-	// gold member registration
+	//  gold member registration
 	gp := GoldPassenger{}
 	gp.newPassenger(11, 98)
 	// bank account after purchase: &58
