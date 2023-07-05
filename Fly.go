@@ -11,7 +11,7 @@ var id_list = list.New()
 // Miles factor for gold members is set to 0.5
 var goldfac = 0.5
 
-// Miles factor for silver members is set to 0.5
+// Miles factor for silver members is set to 0.25
 var silverfac = 0.25
 
 // Checks if the given ID already exist
