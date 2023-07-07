@@ -122,14 +122,12 @@ When we book another ticket, this passenger doesn't get any notice about a loung
 ``` 
 newTravel(&sil, 20)
 ``` 
-Output
+Output:
 ``` 
 Passenger #21 booked a ticket.
 Price: $20
 Miles: 50.00
 Current in account (after transaction): $10
-
-For entering the lounge passenger #21 paid $20. Current in account: $10
 ``` 
 Then we add $25 to the bank account and try to purchase a $40 ticket
 
